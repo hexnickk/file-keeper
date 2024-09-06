@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "autorename-attachments",
+	"name": "Autorename Attachments",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Automatically rename all .png & .jpg files inserted",
+	"author": "Nick K",
+	"authorUrl": "https://x.com/hexnickk",
 	"isDesktopOnly": false
 }

@@ -1,6 +1,8 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { copyFileSync, existsSync, mkdirSync } from "fs";
+import { join } from "path";
 
 const banner =
 `/*
@@ -11,39 +13,63 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = (process.argv[2] === "production");
 
+const currentFolder = process.cwd()
+const distFolder = "autorename-attachments";
+
+// Helper function to copy manifest.json to dist folder
+function copyManifestToDist() {
+  // Ensure dist folder exists
+  if (!existsSync(distFolder)) {
+    mkdirSync(distFolder);
+  }
+
+  // Copy the manifest.json file
+  const source = join(currentFolder, "manifest.json");
+  const destination = join(currentFolder, distFolder, "manifest.json");
+
+  try {
+    copyFileSync(source, destination);
+  } catch (error) {
+    console.error(`Error copying "manifest.json":`, error);
+  }
+}
+
 const context = await esbuild.context({
-	banner: {
-		js: banner,
-	},
-	entryPoints: ["main.ts"],
-	bundle: true,
-	external: [
-		"obsidian",
-		"electron",
-		"@codemirror/autocomplete",
-		"@codemirror/collab",
-		"@codemirror/commands",
-		"@codemirror/language",
-		"@codemirror/lint",
-		"@codemirror/search",
-		"@codemirror/state",
-		"@codemirror/view",
-		"@lezer/common",
-		"@lezer/highlight",
-		"@lezer/lr",
-		...builtins],
-	format: "cjs",
-	target: "es2018",
-	logLevel: "info",
-	sourcemap: prod ? false : "inline",
-	treeShaking: true,
-	outfile: "main.js",
-	minify: prod,
+  banner: {
+    js: banner,
+  },
+  entryPoints: ["main.ts"],
+  bundle: true,
+  external: [
+    "obsidian",
+    "electron",
+    "@codemirror/autocomplete",
+    "@codemirror/collab",
+    "@codemirror/commands",
+    "@codemirror/language",
+    "@codemirror/lint",
+    "@codemirror/search",
+    "@codemirror/state",
+    "@codemirror/view",
+    "@lezer/common",
+    "@lezer/highlight",
+    "@lezer/lr",
+    ...builtins,
+  ],
+  format: "cjs",
+  target: "es2018",
+  logLevel: "info",
+  sourcemap: prod ? false : "inline",
+  treeShaking: true,
+  outfile: join(distFolder, "main.js"),
+  minify: false,
 });
 
 if (prod) {
-	await context.rebuild();
-	process.exit(0);
+  await context.rebuild();
+  copyManifestToDist();
+  process.exit(0);
 } else {
-	await context.watch();
+  await context.watch();
+  copyManifestToDist();
 }
